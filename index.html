@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apucarana 2087 — Portal do Futuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --noite:#0A1B22;
+  --lago2:#0E2E38;
+  --lago:#123A45;
+  --verde:#6EF5B8;
+  --ambar:#FFB454;
+  --rosa:#FF6F8E;
+  --creme:#F5EFE2;
+  --creme-dim:rgba(245,239,226,.62);
+  --creme-fraco:rgba(245,239,226,.35);
+  --f-display:'Unbounded',sans-serif;
+  --f-body:'Manrope',sans-serif;
+  --f-mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;background:var(--noite);}
+body{font-family:var(--f-body);color:var(--creme);overflow:hidden;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--verde);outline-offset:2px;}
+#app{position:fixed;inset:0;}
+
+/* ---------- INTRO ---------- */
+#intro{
+  position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 120%, var(--lago) 0%, var(--noite) 60%), linear-gradient(180deg,var(--noite),#081319);
+  overflow:hidden;
+}
+.intro-estrelas{position:absolute;inset:0;pointer-events:none;}
+.intro-estrelas span{position:absolute;width:2px;height:2px;background:var(--creme);border-radius:50%;opacity:.5;animation:cintilar 4s ease-in-out infinite;}
+@keyframes cintilar{0%,100%{opacity:.15}50%{opacity:.85}}
+.intro-conteudo{position:relative;z-index:2;width:min(92vw,560px);text-align:center;padding:32px 24px;}
+.intro-eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.28em;color:var(--ambar);text-transform:uppercase;margin:0 0 18px;}
+.intro-titulo{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,11vw,84px);line-height:.95;margin:0;color:var(--creme);letter-spacing:-.01em;}
+.intro-titulo .ano{display:block;font-size:.36em;color:var(--verde);font-weight:700;letter-spacing:.08em;margin-top:10px;}
+.intro-texto{font-size:15px;line-height:1.6;color:var(--creme-dim);margin:20px auto 28px;max-width:460px;}
+#form-codigo{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+#input-codigo{flex:1 1 220px;background:rgba(245,239,226,.06);border:1px solid rgba(245,239,226,.25);border-radius:999px;padding:14px 20px;color:var(--creme);font-family:var(--f-mono);font-size:14px;letter-spacing:.04em;outline:none;transition:border-color .2s, background .2s;}
+#input-codigo::placeholder{color:var(--creme-fraco);}
+#input-codigo:focus{border-color:var(--verde);background:rgba(110,245,184,.08);}
+#input-codigo.tremer{animation:tremer .4s;}
+@keyframes tremer{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.btn-primario{background:var(--verde);color:#0A1B22;border:none;border-radius:999px;padding:14px 26px;font-weight:700;font-size:14px;cursor:pointer;transition:transform .2s, box-shadow .2s;}
+.btn-primario:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(110,245,184,.25);}
+.intro-nota{margin-top:22px;font-family:var(--f-mono);font-size:11px;color:var(--creme-fraco);letter-spacing:.02em;}
+.scan-linha{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--verde),transparent);opacity:0;pointer-events:none;}
+#intro.escaneando .scan-linha{opacity:1;animation:varrer 1.1s ease-in-out;}
+#intro.escaneando #form-codigo{opacity:.3;pointer-events:none;}
+@keyframes varrer{0%{top:0}100%{top:100%}}
+
+/* ---------- TOUR SHELL ---------- */
+#tour{position:absolute;inset:0;display:flex;flex-direction:column;}
+#tour[hidden]{display:none;}
+.barra-topo{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:16px;z-index:10;position:relative;background:linear-gradient(180deg, rgba(10,27,34,.75), transparent);}
+.marca{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.04em;}
+.marca span{color:var(--verde);}
+.minimapa{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.no-mapa{background:rgba(245,239,226,.08);border:1px solid rgba(245,239,226,.18);color:var(--creme-dim);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.no-mapa.ativo{background:var(--verde);color:#0A1B22;border-color:var(--verde);}
+.no-mapa:disabled{opacity:.35;cursor:not-allowed;}
+.linha-mapa{width:16px;height:1px;background:repeating-linear-gradient(90deg,var(--verde) 0 4px, transparent 4px 8px);}
+.btn-info{width:32px;height:32px;border-radius:50%;border:1px solid rgba(245,239,226,.25);background:rgba(245,239,226,.06);color:var(--creme);cursor:pointer;font-size:14px;flex:none;}
+
+.viewer{position:relative;flex:1;overflow:hidden;background:#050d11;}
+.cena{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease;}
+.cena.ativa{opacity:1;visibility:visible;pointer-events:auto;}
+
+/* ---------- fotos + tratamento futurista ---------- */
+.cena-foto{position:absolute;inset:-2%;transition:transform .2s ease-out;}
+.cena-foto img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.4) contrast(1.12) brightness(.66) hue-rotate(-8deg);}
+.camada-holo{position:absolute;inset:0;transition:transform .15s ease-out;}
+.grade-um{position:absolute;inset:-2%;pointer-events:none;background:linear-gradient(180deg, rgba(8,19,25,.05) 0%, rgba(8,19,25,.35) 55%, rgba(6,14,18,.88) 100%), radial-gradient(ellipse 90% 60% at 50% 105%, rgba(18,58,69,.75), transparent 60%);}
+.grade-dois{position:absolute;inset:-2%;pointer-events:none;mix-blend-mode:color;background:linear-gradient(135deg, rgba(110,245,184,.16) 0%, rgba(18,58,69,.4) 45%, rgba(255,111,142,.08) 100%);}
+.vinheta{position:absolute;inset:-2%;pointer-events:none;box-shadow:inset 0 0 10vw 4vw rgba(3,8,10,.8);}
+.scanlinhas{position:absolute;inset:-2%;pointer-events:none;opacity:.35;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg, rgba(245,239,226,.06) 0px, rgba(245,239,226,.06) 1px, transparent 1px, transparent 3px);}
+.grao{position:absolute;inset:-2%;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(rgba(245,239,226,.9) .6px, transparent .6px);background-size:3px 3px;}
+
+.glow-verde{filter:drop-shadow(0 0 6px var(--verde)) drop-shadow(0 0 14px rgba(110,245,184,.5));}
+.glow-ambar{filter:drop-shadow(0 0 6px var(--ambar)) drop-shadow(0 0 14px rgba(255,180,84,.5));}
+.glow-rosa{filter:drop-shadow(0 0 6px var(--rosa)) drop-shadow(0 0 14px rgba(255,111,142,.5));}
+
+/* elementos holográficos reutilizáveis, posicionados por estilo inline em % */
+.holo-anel{position:absolute;border-radius:50%;border:1.5px solid var(--verde);box-shadow:0 0 12px var(--verde), inset 0 0 10px rgba(110,245,184,.35);animation:holoPulsar 3.2s ease-in-out infinite;pointer-events:none;}
+@keyframes holoPulsar{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+.holo-domo{position:absolute;border-radius:50% 50% 4% 4% / 100% 100% 6% 6%;background:linear-gradient(180deg, rgba(110,245,184,.4), rgba(110,245,184,.04));border:1px solid var(--verde);box-shadow:0 0 16px rgba(110,245,184,.55);pointer-events:none;}
+.holo-linha{position:absolute;height:2px;pointer-events:none;background:linear-gradient(90deg, transparent, var(--ambar), transparent);opacity:.75;filter:drop-shadow(0 0 6px var(--ambar));}
+.holo-linha-v{position:absolute;width:2px;pointer-events:none;background:linear-gradient(180deg, transparent, var(--verde), transparent);opacity:.7;filter:drop-shadow(0 0 6px var(--verde));}
+.holo-placa{position:absolute;pointer-events:none;background:rgba(10,27,34,.55);border:1px solid rgba(110,245,184,.5);border-radius:10px;padding:6px 12px;font-family:var(--f-mono);font-size:10.5px;line-height:1.4;color:var(--verde);box-shadow:0 0 14px rgba(110,245,184,.3);backdrop-filter:blur(3px);}
+.holo-placa.rosa{border-color:rgba(255,111,142,.55);color:var(--rosa);box-shadow:0 0 14px rgba(255,111,142,.3);}
+.holo-placa.ambar{border-color:rgba(255,180,84,.55);color:var(--ambar);box-shadow:0 0 14px rgba(255,180,84,.3);}
+.holo-titulo{position:absolute;pointer-events:none;font-family:var(--f-display);font-weight:800;white-space:nowrap;}
+.holo-particula{position:absolute;border-radius:50%;background:var(--verde);pointer-events:none;animation:flutuar 3.6s ease-in-out infinite;}
+@keyframes flutuar{0%,100%{transform:translateY(0) translateX(0);opacity:.5}50%{transform:translateY(-14px) translateX(6px);opacity:1}}
+.holo-coroa{position:absolute;pointer-events:none;filter:drop-shadow(0 0 10px var(--ambar));}
+.holo-varredura{position:absolute;pointer-events:none;background:linear-gradient(180deg, transparent, rgba(110,245,184,.35), transparent);opacity:.55;animation:varreVert 3.4s ease-in-out infinite;}
+@keyframes varreVert{0%,100%{opacity:.15}50%{opacity:.6}}
+.holo-moldura{position:absolute;pointer-events:none;border:1px solid rgba(110,245,184,.55);border-radius:6px;box-shadow:0 0 14px rgba(110,245,184,.25), inset 0 0 14px rgba(110,245,184,.12);}
+.holo-moldura::before,.holo-moldura::after{content:'';position:absolute;width:10px;height:10px;border:2px solid var(--verde);}
+.holo-moldura::before{top:-2px;left:-2px;border-right:none;border-bottom:none;}
+.holo-moldura::after{bottom:-2px;right:-2px;border-left:none;border-top:none;}
+
+.hotspot{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border:none;background:transparent;cursor:pointer;padding:0;z-index:4;}
+.ponto-pulso{position:absolute;inset:0;}
+.ponto-pulso::before{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--verde);box-shadow:0 0 10px var(--verde);}
+.ponto-pulso::after{content:'';position:absolute;inset:-2px;border-radius:50%;border:1.5px solid var(--verde);animation:pulsar 2.2s ease-out infinite;}
+@keyframes pulsar{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+
+.seta{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(10,27,34,.5);border:1px solid rgba(245,239,226,.2);color:var(--creme);font-size:22px;cursor:pointer;z-index:8;backdrop-filter:blur(4px);transition:background .2s;}
+.seta:hover{background:rgba(110,245,184,.18);}
+.seta-prev{left:14px;}
+.seta-next{right:14px;}
+.seta[hidden]{display:none;}
+
+.portal-cta{position:absolute;display:flex;align-items:center;gap:14px;background:rgba(10,27,34,.5);border:1px solid rgba(110,245,184,.35);border-radius:999px;padding:10px 22px 10px 10px;cursor:pointer;backdrop-filter:blur(6px);z-index:6;}
+.portal-anel{width:38px;height:38px;border-radius:50%;flex:none;background:conic-gradient(from 0deg, var(--verde), var(--ambar), var(--rosa), var(--verde));animation:girar 6s linear infinite;}
+@keyframes girar{to{transform:rotate(360deg)}}
+.portal-texto{text-align:left;font-size:12px;line-height:1.35;color:var(--creme-dim);}
+.portal-texto em{display:block;font-style:normal;font-family:var(--f-display);font-size:13px;color:var(--creme);font-weight:600;}
+
+.barra-status{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:14px;z-index:10;position:relative;background:linear-gradient(0deg, rgba(10,27,34,.75), transparent);}
+.local-info{display:flex;flex-direction:column;gap:2px;}
+.local-info strong{font-family:var(--f-display);font-size:15px;font-weight:600;}
+.mono{font-family:var(--f-mono);font-size:11px;color:var(--creme-fraco);letter-spacing:.02em;}
+.pontos-vp{display:flex;gap:8px;}
+.ponto{width:8px;height:8px;border-radius:50%;border:none;background:rgba(245,239,226,.25);cursor:pointer;padding:0;}
+.ponto.ativo{background:var(--verde);width:22px;border-radius:5px;transition:all .25s;}
+
+/* ---------- FICHA / SOBRE ---------- */
+.ficha{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(92vw,440px);background:rgba(14,32,40,.94);border:1px solid rgba(245,239,226,.15);border-bottom:none;border-radius:18px 18px 0 0;padding:20px 22px 26px;z-index:20;backdrop-filter:blur(10px);}
+.ficha[hidden]{display:none;}
+.ficha-fechar{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--creme-dim);font-size:14px;cursor:pointer;}
+.ficha h3{font-family:var(--f-display);font-size:16px;margin:0 0 8px;color:var(--verde);}
+.ficha p{font-size:13.5px;line-height:1.6;color:var(--creme-dim);margin:0;}
+
+.painel-sobre{position:absolute;inset:0;background:rgba(8,19,25,.86);display:flex;align-items:center;justify-content:center;z-index:30;backdrop-filter:blur(6px);padding:24px;}
+.painel-sobre[hidden]{display:none;}
+.painel-sobre-caixa{max-width:460px;background:rgba(14,32,40,.96);border:1px solid rgba(245,239,226,.15);border-radius:20px;padding:28px;position:relative;max-height:80vh;overflow:auto;}
+.painel-sobre-caixa h3{font-family:var(--f-display);color:var(--verde);margin-top:0;}
+.painel-sobre-caixa p{font-size:13.5px;line-height:1.65;color:var(--creme-dim);}
+.painel-sobre-caixa button{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--creme-dim);font-size:14px;cursor:pointer;}
+
+#transicao{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(circle at var(--ox,50%) var(--oy,50%), var(--lago) 0%, var(--noite) 65%);clip-path:circle(0% at var(--ox,50%) var(--oy,50%));transition:clip-path .65s cubic-bezier(.65,0,.35,1);}
+#transicao.cobrir{clip-path:circle(150% at var(--ox,50%) var(--oy,50%));}
+
+@media (max-width:640px){
+  .intro-texto{font-size:14px;}
+  .barra-topo{padding:10px 14px;}
+  .no-mapa{padding:6px 10px;font-size:10.5px;}
+  .portal-cta{padding:8px 16px 8px 8px;}
+  .portal-texto{font-size:11px;}
+  .seta{width:38px;height:38px;font-size:18px;}
+  .holo-placa{font-size:9.5px;padding:5px 9px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <section id="intro">
+    <div class="intro-estrelas" aria-hidden="true">
+      <span style="left:8%;top:12%;"></span><span style="left:16%;top:30%;animation-delay:.4s;"></span>
+      <span style="left:26%;top:8%;animation-delay:1.1s;"></span><span style="left:38%;top:22%;animation-delay:.7s;"></span>
+      <span style="left:62%;top:14%;animation-delay:.2s;"></span><span style="left:74%;top:28%;animation-delay:1.4s;"></span>
+      <span style="left:84%;top:10%;animation-delay:.9s;"></span><span style="left:92%;top:24%;animation-delay:.3s;"></span>
+      <span style="left:50%;top:6%;animation-delay:1.6s;"></span><span style="left:10%;top:70%;animation-delay:.6s;"></span>
+      <span style="left:90%;top:66%;animation-delay:1.2s;"></span><span style="left:70%;top:80%;animation-delay:.5s;"></span>
+    </div>
+    <div class="intro-conteudo">
+      <p class="intro-eyebrow">um cartão-postal do futuro</p>
+      <h1 class="intro-titulo">APUCARANA<span class="ano">2087</span></h1>
+      <p class="intro-texto">Leia o código, abra o portal e caminhe por três pontos reais da cidade — fotografados hoje e reimaginados décadas à frente: o Parque Jaboti, o Prédio da Onça com a barraca do Banzé, e o Shopping Centronorte.</p>
+      <form id="form-codigo" autocomplete="off">
+        <input id="input-codigo" type="text" placeholder="digite um código, ex. JABOTI-2087" maxlength="24" aria-label="Código de acesso">
+        <button type="submit" class="btn-primario">Desbloquear portal</button>
+      </form>
+      <p class="intro-nota">fotos reais tratadas digitalmente · visão especulativa e não oficial</p>
+    </div>
+    <div class="scan-linha" aria-hidden="true"></div>
+  </section>
+
+  <main id="tour" hidden>
+    <header class="barra-topo">
+      <div class="marca">APUCARANA <span>2087</span></div>
+      <nav class="minimapa" aria-label="Locais do passeio">
+        <button class="no-mapa ativo" data-loc="0">🌿 Jaboti</button>
+        <span class="linha-mapa" aria-hidden="true"></span>
+        <button class="no-mapa" data-loc="1" disabled>🏙️ Prédio &amp; Banzé</button>
+        <span class="linha-mapa" aria-hidden="true"></span>
+        <button class="no-mapa" data-loc="2" disabled>🛍️ Shopping</button>
+      </nav>
+      <button class="btn-info" id="btn-info" aria-label="Sobre este passeio">ⓘ</button>
+    </header>
+
+    <div class="viewer" id="viewer">
+
+      <!-- ===================== LOC 0 · PARQUE JABOTI ===================== -->
+
+      <!-- VP0 — vista aérea do lago -->
+      <div class="cena ativa" data-loc="0" data-vp="0">
+        <div class="cena-foto"><img src="assets/jaboti.png" alt="Lago Jaboti visto do alto, versão futurista" style="object-position:center 40%"></div>
+        <div class="camada-holo">
+          <div class="holo-domo" style="left:36%;top:52%;width:56px;height:30px;"></div>
+          <div class="holo-domo" style="left:63%;top:58%;width:40px;height:22px;"></div>
+          <div class="holo-anel" style="left:36%;top:52%;width:70px;height:70px;margin:-35px 0 0 -35px;"></div>
+          <div class="holo-linha" style="left:20%;top:47%;width:55%;"></div>
+          <div class="holo-placa ambar" style="left:6%;top:14%;">ESPELHO D'ÁGUA · 150.000 m²<br>QUALIDADE DA ÁGUA: ÓTIMA</div>
+          <div class="holo-particula" style="left:18%;top:66%;width:3px;height:3px;"></div>
+          <div class="holo-particula" style="left:80%;top:24%;width:3px;height:3px;animation-delay:1s;"></div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:37%;top:52%" data-titulo="Domos flutuantes de vidro solar" data-texto="Sobre o espelho d'água de 150 mil m², pequenos domos flutuantes captam energia solar de dia através de painéis integrados, armazenam em baterias quânticas e viram pontos de descanso e contemplação à noite com iluminação limpa." title="Domos flutuantes"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:15%;top:68%" data-titulo="Capivaras do Jaboti - Guardiadoras da biodiversidade" data-texto="Curiosidade: as capivaras são os maiores roedores do mundo! No Jaboti de 2087, ganham coleiras bio-sensoras que monitoram a saúde da colônia e o ecossistema aquático em tempo real, equilibrando visitação humana com preservação natural." title="Capivaras com coleira-sensor"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:70%;top:44%" data-titulo="Carrosel de carrinhos para atravessar o lago" data-texto="Pequenos carrinhos solares e eólicos fluem pelo lago em circuito contínuo, permitindo travessias limpas. A energia vem de painéis solares nos domos e turbinas eólicas miniaturizadas nas velas dos carrinhos. Uma jornada inesquecível entre águas e tecnologia." title="Carrinhos do lago"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:60%;top:63%" data-titulo="Chafarizes bioluminescentes do lago" data-texto="Os chafarizes que abbastam o Jaboti agora funcionam com bombas geotérmicas — captando calor das camadas profundas da Terra. Criam jatos que à noite se iluminam com LED bioluminescente alimentado pela energia cinética da própria água." title="Chafarizes bioluminescentes"><span class="ponto-pulso"></span></button>
+      </div>
+
+      <!-- VP1 — pista ao redor do lago -->
+      <div class="cena" data-loc="0" data-vp="1">
+        <div class="cena-foto"><img src="assets/jaboti.png" alt="Pista ao redor do Lago Jaboti, versão futurista" style="object-position:75% 78%;transform:scale(1.35)"></div>
+        <div class="camada-holo">
+          <div class="holo-linha" style="left:8%;top:58%;width:80%;"></div>
+          <div class="holo-linha" style="left:8%;top:64%;width:70%;opacity:.4;"></div>
+          <div class="holo-anel" style="left:30%;top:45%;width:30px;height:30px;margin:-15px 0 0 -15px;"></div>
+          <div class="holo-anel" style="left:70%;top:38%;width:24px;height:24px;margin:-12px 0 0 -12px;"></div>
+          <div class="holo-placa" style="left:56%;top:14%;">PISTA 3 KM · HOLO-RITMO ATIVO</div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:50%;top:60%" data-titulo="Pista de 3 km com Luizinhas e holo-ritmo" data-texto="A pista que contorna o Jaboti brilha com as famosas Luizinhas — agora nanolâmpadas LED de baixo consumo alimentadas por energia cinética, capturando movimento de passantes e ciclistas. Hologramas de ritmo mantêm o pace ideal para cada treino." title="Pista com Luizinhas"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:30%;top:45%" data-titulo="Academia orgânica de energia cinética" data-texto="Os aparelhos de musculação e funcional ganham revestimento piezoelétrico: cada movimento gera energia. Um agachamento, uma flexão, um levantamento — tudo é convertido em eletricidade que alimenta os LEDs da pista e o sistema de iluminação do parque." title="Academia orgânica"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:75%;top:72%" data-titulo="Carrinho de Churros Futurista" data-texto="O tradicional vendedor de churros ganha versão futurista com fogão alimentado por biogás (derivado de resíduos compostáveis) e bateria de hidrogênio verde. O carrinho é 100% elétrico e funciona como ponto de recarga solar para celulares dos visitantes." title="Carrinho de Churros"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:82%;top:65%" data-titulo="Estrutura de armazenamento de energia" data-texto="Atrás do carrinho de churros, uma coluna de armazenamento térmico acumula calor do dia via painéis solares. À noite, libera essa energia para manter o fogão aquecido e alimentar a bateria de hidrogênio que torna o carrinho autossustentável." title="Energia e armazenamento"><span class="ponto-pulso"></span></button>
+      </div>
+
+      <!-- VP2 — skyline ao amanhecer + portal -->
+      <div class="cena" data-loc="0" data-vp="2">
+        <div class="cena-foto"><img src="assets/jaboti.png" alt="Skyline de Apucarana ao fundo do lago, versão futurista" style="object-position:30% 10%;transform:scale(1.25)"></div>
+        <div class="camada-holo">
+          <div class="holo-titulo glow-verde" style="left:8%;top:70%;font-size:clamp(16px,3vw,30px);color:var(--verde);">EU ♥ APUCARANA</div>
+          <div class="holo-linha" style="left:8%;top:78%;width:34%;"></div>
+          <div class="holo-varredura" style="left:0;top:0;width:100%;height:40%;"></div>
+          <div class="holo-placa ambar" style="left:56%;top:10%;">SKYLINE · CENTRO<br>840 m DE ALTITUDE</div>
+        <button class="hotspot" style="left:20%;top:72%" data-titulo="Apucarana em 2087" data-texto="Apucarana, a 'Cidade do Início', torna-se em 2087 um modelo de sustentabilidade. De raízes voltadas à indústria têxtil e café, a cidade reimagina seu futuro: espaços verdes conectados, tecnologia integrada à natureza, mobilidade limpa e comarcas de biodiversidade urbana. O Parque Jaboti é o coração verde desta transformação." title="Apucarana em 2087"><span class="ponto-pulso"></span></button>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:22%;top:73%" data-titulo="Eu Amo Apucarana, agora em luz" data-texto="O tradicional letreiro do parque vira um mural holográfico onde moradores podem deixar mensagens para a cidade — um jeito novo de dizer a mesma coisa de sempre." title="Eu Amo Apucarana em luz"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:62%;top:22%" data-titulo="Skyline reflorestado" data-texto="Os prédios do centro ganham terraços verdes visíveis mesmo à distância — a cidade cresce para cima sem perder o verde característico do vale." title="Skyline reflorestado"><span class="ponto-pulso"></span></button>
+        <button class="portal-cta" data-destino-loc="1" style="right:6%;bottom:16%" aria-label="Atravessar o portal para o Prédio e a Banzé">
+          <span class="portal-anel" aria-hidden="true"></span>
+          <span class="portal-texto">Atravessar o portal<br><em>Prédio &amp; Banzé →</em></span>
+        </button>
+      </div>
+
+      <!-- ===================== LOC 1 · PRÉDIO DA ONÇA & BANZÉ ===================== -->
+
+      <!-- VP0 — fachada completa do prédio -->
+      <div class="cena" data-loc="1" data-vp="0">
+        <div class="cena-foto"><img src="assets/predio-onca.png" alt="Prédio da Onça, versão futurista" style="object-position:center 20%"></div>
+        <div class="camada-holo">
+          <svg class="holo-coroa" style="left:20%;top:0%;width:60%;height:16%;" viewBox="0 0 300 80" preserveAspectRatio="none">
+            <path d="M10,78 C10,20 290,20 290,78 Z" fill="none" stroke="var(--ambar)" stroke-width="4"/>
+            <path d="M10,78 C10,20 290,20 290,78 Z" fill="var(--ambar)" opacity=".18"/>
+            <rect x="0" y="72" width="300" height="8" rx="4" fill="var(--ambar)" opacity=".85"/>
+          </svg>
+          <div class="holo-linha-v" style="left:22%;top:14%;height:60%;"></div>
+          <div class="holo-linha-v" style="left:78%;top:14%;height:60%;"></div>
+          <div class="holo-placa" style="left:4%;top:6%;">CORÔA SOLAR ARTICULADA<br>MODO: CAPTAÇÃO MÁXIMA</div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:50%;top:8%" data-titulo="Boné Solar Articulado - Energia Fotovoltaica" data-texto="Em homenagem à Capital Nacional do Boné, o topo do prédio ganha um imenso boné solar que se inclina ao longo do dia para captar máxima luz. Painéis fotovoltaicos de última geração cobrem toda superfície, alimentando o prédio 24/7 através de bateria de lítio com grafeno integrada." title="Boné solar do Prédio"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:50%;top:38%" data-titulo="Onça em Projeção Holográfica Viva" data-texto="O mural da onça ganha camadas de projeção onde a floresta pintada 'respira' à noite. A cachoeira azul brilha de verdade — alimentada por energia gerada pelo prédio durante o dia via painéis. Um ciclo contínuo de sustentabilidade." title="Mural holográfico vivo"><span class="ponto-pulso"></span></button>
+      </div>
+
+      <!-- VP1 — portal de entrada -->
+      <div class="cena" data-loc="1" data-vp="1">
+        <div class="cena-foto"><img src="assets/predio-onca.png" alt="Entrada do Prédio da Onça, versão futurista" style="object-position:50% 88%;transform:scale(1.6)"></div>
+        <div class="camada-holo">
+          <div class="holo-moldura" style="left:18%;top:18%;width:64%;height:64%;"></div>
+          <div class="holo-linha" style="left:20%;top:22%;width:60%;"></div>
+          <div class="holo-placa rosa" style="left:20%;top:6%;">TÚNEL DE BOAS-VINDAS<br>ILUMINAÇÃO RESPONSIVA</div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:50%;top:50%" data-titulo="Túnel de boas-vindas" data-texto="O pórtico vermelho na entrada vira um túnel de luz que muda de cor conforme o movimento de quem passa — o mesmo ponto de encontro de sempre, agora também um convite." title="Túnel de boas-vindas"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:26%;top:66%" data-titulo="Fachada viva" data-texto="Faixas verticais de vegetação cobrem partes do prédio, ajudando a refrescar o ambiente e lembrando que Apucarana também é feita de plantação, café e vale." title="Fachada viva"><span class="ponto-pulso"></span></button>
+      </div>
+
+      <!-- VP2 — barraca do Banzé + portal -->
+      <div class="cena" data-loc="1" data-vp="2">
+        <div class="cena-foto"><img src="assets/banze.png" alt="Barraca do Banzé, versão futurista" style="object-position:center 40%"></div>
+        <div class="camada-holo">
+          <div class="holo-titulo glow-rosa" style="left:30%;top:10%;font-size:clamp(20px,4vw,34px);color:var(--rosa);">BANZÉ 3087</div>
+          <div class="holo-placa" style="left:8%;top:34%;">CACHORRO-QUENTE<br>RECEITA ORIGINAL · DESDE SEMPRE</div>
+          <div class="holo-anel" style="left:60%;top:52%;width:26px;height:26px;margin:-13px 0 0 -13px;"></div>
+          <div class="holo-particula" style="left:70%;top:20%;width:3px;height:3px;"></div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:58%;top:53%" data-titulo="Banzé Cachorro Quente - Tradição que virou sustentável" data-texto="A barraca do Banzé mantém a receita tradicional de sempre, mas agora cozinha com biogás (energia dos resíduos da cozinha compostados) e fogão de indução por bateria solar. O ajudante robótico só gerencia fila — quem prepara o cachorro continua sendo humano." title="O mesmo cachorro-quente"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:30%;top:32%" data-titulo="Poste Inteligente - Estação de Energia Limpa" data-texto="O poste azul perto da barraca é uma estação inteligente: painel solar no topo, gerador eólico miniaturizado nas laterais, e ponto de recarga para baterias. Luz LED alimenta o ambiente à noite e carrega os celulares dos visitantes — energia gratuita do futuro." title="Poste inteligente"><span class="ponto-pulso"></span></button>
+        <button class="portal-cta" data-destino-loc="2" style="right:6%;bottom:12%" aria-label="Atravessar o portal para o Shopping">
+          <span class="portal-anel" aria-hidden="true"></span>
+          <span class="portal-texto">Atravessar o portal<br><em>Shopping →</em></span>
+        </button>
+      </div>
+
+      <!-- ===================== LOC 2 · SHOPPING ===================== -->
+
+      <!-- VP0 — fachada do shopping -->
+      <div class="cena" data-loc="2" data-vp="0">
+        <div class="cena-foto"><img src="assets/shopping-fora.png" alt="Fachada do Shopping Centronorte, versão futurista" style="object-position:center 30%"></div>
+        <div class="camada-holo">
+          <div class="holo-moldura" style="left:30%;top:14%;width:38%;height:14%;"></div>
+          <div class="holo-varredura" style="left:30%;top:14%;width:38%;height:14%;"></div>
+          <div class="holo-placa ambar" style="left:6%;top:8%;">PAINEL SOLAR-LED<br>PREVISÃO: CÉU LIMPO</div>
+          <div class="holo-linha-v" style="left:14%;top:20%;height:55%;"></div>
+          <div class="holo-linha-v" style="left:86%;top:20%;height:55%;"></div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:49%;top:20%" data-titulo="Painel Solar Transparente - Energia Fotovoltaica" data-texto="A grande tela de vidro na fachada é um painel solar transparente de última geração que além de captar energia solar, exibe a programação do dia. A energia que ilumina a vitrine, as escadas rolantes e todo o interior vem desses próprios painéis." title="Painel solar-LED"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:16%;top:60%" data-titulo="Estacionamento Inteligente - Transporte Limpo" data-texto="As primeiras vagas do estacionamento são reservadas para bicicletas com carregamento solar e pequenos drones de entrega elétricos. O chão é piezoelétrico — cada carro que entra gera energia com seu peso. Mobilidade e sustentabilidade lado a lado." title="Estacionamento inteligente"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:70%;top:12%" data-titulo="Lâmpadas LED Solares do Shopping" data-texto="As luzes do exterior usam LED de alta eficiência alimentadas por painéis solares integrados. Durante o dia armazenam energia em supercapacitores, à noite iluminam todo o perímetro sem precisar de rede elétrica — o shopping que se ilumina." title="Lâmpadas LED solares"><span class="ponto-pulso"></span></button>
+      </div>
+
+      <!-- VP1 — interior / praça de alimentação -->
+      <div class="cena" data-loc="2" data-vp="1">
+        <div class="cena-foto"><img src="assets/shopping-dentro.png" alt="Interior do Shopping Centronorte, versão futurista" style="object-position:center 30%"></div>
+        <div class="camada-holo">
+          <div class="holo-placa" style="left:6%;top:10%;">CÚPULA DE VIDRO SOLAR<br>LUZ NATURAL: 92%</div>
+          <div class="holo-anel" style="left:66%;top:44%;width:34px;height:34px;margin:-17px 0 0 -17px;"></div>
+          <div class="holo-linha" style="left:10%;top:64%;width:36%;"></div>
+        </div>
+        <div class="grade-um"></div><div class="grade-dois"></div><div class="scanlinhas"></div><div class="grao"></div><div class="vinheta"></div>
+        <button class="hotspot" style="left:30%;top:26%" data-titulo="Cúpula de Vidro Solar - Energia Fotovoltaica" data-texto="A grande claraboia de vidro é revestida por uma camada solar quase invisível que capta luz sem bloqueá-la. Mantém os 92% de iluminação natural do dia, e à noite seus próprios painéis fornecem toda energia para LED de reposição. Sem contas de energia." title="Cúpula de vidro solar"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:66%;top:46%" data-titulo="Escadas Rolantes Inteligentes - Energia Cinética" data-texto="As escadas rolantes ajustam velocidade automaticamente conforme o fluxo de gente — consumem 30% menos energia. Cada passo gera energia via tecnologia piezoelétrica do piso, e o corrimão brilha com LED alimentado pelo movimento das pessoas." title="Escadas rolantes inteligentes"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:50%;top:60%" data-titulo="Piso Piezoelétrico - Energia do Movimento" data-texto="O piso da praça de alimentação é revestido de material piezoelétrico: cada passada de visitante gera pequenas descargas elétricas que alimentam os LEDs decorativos e sistemas de refrigeração dos aparadores das lojas. O movimento da cidade virou energia." title="Piso piezoelétrico"><span class="ponto-pulso"></span></button>
+        <button class="hotspot" style="left:15%;top:15%" data-titulo="Ar-Condicionado com Resfriamento Geotérmico" data-texto="O sistema de climatização do shopping aproveita o calor geotérmico do subsolo — tubulações profundas mantêm temperatura ideal usando energia renovável. No verão resfria naturalmente, no inverno aquece. Sustentável e econômico o ano inteiro." title="Ar-condicionado geotérmico"><span class="ponto-pulso"></span></button>
+        <button class="portal-cta portal-fim" id="btn-reiniciar" style="right:6%;bottom:10%" aria-label="Reiniciar o passeio">
+          <span class="portal-anel" aria-hidden="true"></span>
+          <span class="portal-texto">Fim do passeio<br><em>Reiniciar →</em></span>
+        </button>
+      </div>
+
+      <button class="seta seta-prev" id="seta-prev" aria-label="Vista anterior" hidden>‹</button>
+      <button class="seta seta-next" id="seta-next" aria-label="Próxima vista">›</button>
+    </div>
+
+    <footer class="barra-status">
+      <div class="local-info">
+        <strong id="nome-local">Parque Jaboti</strong>
+        <span id="coords-local" class="mono">23°33'03" S · 51°27'39" W</span>
+      </div>
+      <div class="pontos-vp" id="pontos-vp">
+        <button class="ponto ativo" data-vp="0" aria-label="Vista 1"></button>
+        <button class="ponto" data-vp="1" aria-label="Vista 2"></button>
+        <button class="ponto" data-vp="2" aria-label="Vista 3"></button>
+      </div>
+      <div class="mono" id="contador-vp">Vista 1/3</div>
+    </footer>
+  </main>
+
+  <aside id="ficha" class="ficha" hidden>
+    <button class="ficha-fechar" id="ficha-fechar" aria-label="Fechar">✕</button>
+    <h3 id="ficha-titulo"></h3>
+    <p id="ficha-texto"></p>
+  </aside>
+
+  <div id="painel-sobre" class="painel-sobre" hidden>
+    <div class="painel-sobre-caixa">
+      <button id="fechar-sobre" aria-label="Fechar">✕</button>
+      <h3>Sobre este passeio</h3>
+      <p>Um passeio virtual especulativo pela Apucarana de 2087 — construído a partir de fotos reais de três pontos da cidade (Parque Jaboti, Prédio da Onça com a barraca do Banzé, e Shopping Centronorte), tratadas digitalmente e com elementos gráficos sobrepostos para imaginar como esses lugares poderiam ser décadas à frente.</p>
+      <p>Mova o cursor pela cena para olhar ao redor, use as setas (ou ← →) para mudar de vista, e atravesse os portais para mudar de lugar. Toque nos pontos que brilham para saber mais. É uma visão criativa e não oficial, feita por diversão.</p>
+    </div>
+  </div>
+
+  <div id="transicao" aria-hidden="true"></div>
+</div>
+
+<script>
+(function(){
+  var vpPorLocal = [3,3,2];
+  var nomes = ['Parque Jaboti', 'Prédio da Onça & Banzé', 'Shopping Centronorte'];
+  var coords = ["23°33'03\" S · 51°27'39\" W", "Rua Minas Gerais · Centro de Apucarana", "Av. Municipal · Centro de Apucarana"];
+  var estado = { loc:0, vp:0, avancouLoc1:false, avancouLoc2:false };
+
+  function cenaEl(loc,vp){
+    return document.querySelector('.cena[data-loc="'+loc+'"][data-vp="'+vp+'"]');
+  }
+
+  function reduzMovimento(){
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function transicao(evento, callback){
+    var overlay = document.getElementById('transicao');
+    var x = '50%', y = '50%';
+    if(evento){
+      var alvoEl = evento.currentTarget || evento.target;
+      if(alvoEl && alvoEl.getBoundingClientRect){
+        var r = alvoEl.getBoundingClientRect();
+        x = (r.left + r.width/2) + 'px';
+        y = (r.top + r.height/2) + 'px';
+      }
+    }
+    overlay.style.setProperty('--ox', x);
+    overlay.style.setProperty('--oy', y);
+    overlay.classList.add('cobrir');
+    var feito = false;
+    function finalizar(){
+      if(feito) return;
+      feito = true;
+      overlay.removeEventListener('transitionend', aoTerminar);
+      callback();
+      requestAnimationFrame(function(){ overlay.classList.remove('cobrir'); });
+    }
+    function aoTerminar(e){
+      if(e.propertyName && e.propertyName !== 'clip-path') return;
+      finalizar();
+    }
+    overlay.addEventListener('transitionend', aoTerminar);
+    setTimeout(finalizar, reduzMovimento() ? 60 : 900);
+  }
+
+  function atualizarPontosVp(){
+    var cont = document.getElementById('pontos-vp');
+    var total = vpPorLocal[estado.loc];
+    cont.innerHTML = '';
+    for(var i=0;i<total;i++){
+      var b = document.createElement('button');
+      b.className = 'ponto' + (i===estado.vp ? ' ativo' : '');
+      b.dataset.vp = i;
+      b.setAttribute('aria-label', 'Vista ' + (i+1));
+      b.addEventListener('click', function(e){ irLocalVp(estado.loc, +this.dataset.vp, e); });
+      cont.appendChild(b);
+    }
+  }
+
+  function atualizarUI(){
+    document.querySelectorAll('.no-mapa').forEach(function(btn){
+      var l = +btn.dataset.loc;
+      btn.classList.toggle('ativo', l === estado.loc);
+      if(l === 1 && estado.avancouLoc1) btn.disabled = false;
+      if(l === 2 && estado.avancouLoc2) btn.disabled = false;
+    });
+    atualizarPontosVp();
+    var contador = document.getElementById('contador-vp');
+    if(contador) contador.textContent = 'Vista ' + (estado.vp+1) + '/' + vpPorLocal[estado.loc];
+    var nomeEl = document.getElementById('nome-local');
+    var coordEl = document.getElementById('coords-local');
+    if(nomeEl) nomeEl.textContent = nomes[estado.loc];
+    if(coordEl) coordEl.textContent = coords[estado.loc];
+    var setaPrev = document.getElementById('seta-prev');
+    var setaNext = document.getElementById('seta-next');
+    if(setaPrev) setaPrev.hidden = (estado.vp === 0);
+    if(setaNext) setaNext.hidden = (estado.vp === vpPorLocal[estado.loc]-1);
+  }
+
+  function irLocalVp(loc, vp, evento){
+    var atual = document.querySelector('.cena.ativa');
+    var alvo = cenaEl(loc, vp);
+    if(!alvo || alvo === atual) return;
+    transicao(evento, function(){
+      if(atual) atual.classList.remove('ativa');
+      alvo.classList.add('ativa');
+      estado.loc = loc; estado.vp = vp;
+      if(loc === 1) estado.avancouLoc1 = true;
+      if(loc === 2) estado.avancouLoc2 = true;
+      atualizarUI();
+    });
+  }
+
+  document.getElementById('seta-prev').addEventListener('click', function(e){
+    if(estado.vp > 0) irLocalVp(estado.loc, estado.vp-1, e);
+  });
+  document.getElementById('seta-next').addEventListener('click', function(e){
+    if(estado.vp < vpPorLocal[estado.loc]-1) irLocalVp(estado.loc, estado.vp+1, e);
+  });
+  document.querySelectorAll('.no-mapa').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      if(btn.disabled) return;
+      irLocalVp(+btn.dataset.loc, 0, e);
+    });
+  });
+  document.querySelectorAll('.portal-cta[data-destino-loc]').forEach(function(btn){
+    btn.addEventListener('click', function(e){ irLocalVp(+btn.dataset.destinoLoc, 0, e); });
+  });
+  var btnReiniciar = document.getElementById('btn-reiniciar');
+  if(btnReiniciar) btnReiniciar.addEventListener('click', function(e){ irLocalVp(0, 0, e); });
+
+  document.querySelectorAll('.hotspot').forEach(function(h){
+    h.addEventListener('click', function(){
+      document.getElementById('ficha-titulo').textContent = h.dataset.titulo;
+      document.getElementById('ficha-texto').textContent = h.dataset.texto;
+      document.getElementById('ficha').hidden = false;
+    });
+  });
+  document.getElementById('ficha-fechar').addEventListener('click', function(){
+    document.getElementById('ficha').hidden = true;
+  });
+  document.getElementById('btn-info').addEventListener('click', function(){
+    document.getElementById('painel-sobre').hidden = false;
+  });
+  document.getElementById('fechar-sobre').addEventListener('click', function(){
+    document.getElementById('painel-sobre').hidden = true;
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(document.getElementById('tour').hidden) return;
+    if(e.key === 'ArrowRight' && estado.vp < vpPorLocal[estado.loc]-1) irLocalVp(estado.loc, estado.vp+1);
+    if(e.key === 'ArrowLeft' && estado.vp > 0) irLocalVp(estado.loc, estado.vp-1);
+    if(e.key === 'Escape'){
+      document.getElementById('ficha').hidden = true;
+      document.getElementById('painel-sobre').hidden = true;
+    }
+  });
+
+  var viewer = document.getElementById('viewer');
+  var raf = null;
+  viewer.addEventListener('pointermove', function(e){
+    if(reduzMovimento()) return;
+    if(raf) return;
+    raf = requestAnimationFrame(function(){
+      raf = null;
+      var r = viewer.getBoundingClientRect();
+      var nx = ((e.clientX - r.left) / r.width - .5) * 2;
+      var ny = ((e.clientY - r.top) / r.height - .5) * 2;
+      var ativa = document.querySelector('.cena.ativa');
+      if(!ativa) return;
+      var foto = ativa.querySelector('.cena-foto');
+      var holo = ativa.querySelector('.camada-holo');
+      if(foto) foto.style.transform = 'translate(' + (nx*6) + 'px,' + (ny*3) + 'px)';
+      if(holo) holo.style.transform = 'translate(' + (nx*16) + 'px,' + (ny*8) + 'px)';
+    });
+  });
+
+  var form = document.getElementById('form-codigo');
+  var input = document.getElementById('input-codigo');
+  var introEl = document.getElementById('intro');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!input.value.trim()){
+      input.classList.remove('tremer');
+      void input.offsetWidth;
+      input.classList.add('tremer');
+      input.focus();
+      return;
+    }
+    introEl.classList.add('escaneando');
+    setTimeout(function(){
+      transicao(null, function(){
+        introEl.style.display = 'none';
+        document.getElementById('tour').hidden = false;
+        atualizarUI();
+      });
+    }, reduzMovimento() ? 80 : 1150);
+  });
+
+  atualizarUI();
+})();
+</script>
+</body>
+</html>
